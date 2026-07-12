@@ -3,7 +3,20 @@ import { supabase } from '@/supabaseClient'
 
 export type PoolIngredient = { id: number; name: string; selected: boolean; category: string }
 
-export const CATEGORIES = ['Produce', 'Dairy', 'Meat', 'Grains', 'Frozen', 'Bakery', 'Beverages', 'Spices', 'Other']
+export const CATEGORIES = [
+  'Vegetables',
+  'Fruits',
+  'Dairy',
+  'Meat',
+  'Grains',
+  'Snacks',
+  'Sauces',
+  'Frozen',
+  'Bakery',
+  'Beverages',
+  'Spices',
+  'Other',
+]
 
 export const useIngredientPool = () =>
   useQuery({
