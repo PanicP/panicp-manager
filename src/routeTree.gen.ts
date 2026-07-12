@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkoutsRouteImport } from './routes/workouts'
 import { Route as GroceriesRouteImport } from './routes/groceries'
-import { Route as ExamplesRouteImport } from './routes/examples'
 import { Route as CookbookRouteImport } from './routes/cookbook'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -23,11 +22,6 @@ const WorkoutsRoute = WorkoutsRouteImport.update({
 const GroceriesRoute = GroceriesRouteImport.update({
   id: '/groceries',
   path: '/groceries',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExamplesRoute = ExamplesRouteImport.update({
-  id: '/examples',
-  path: '/examples',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookbookRoute = CookbookRouteImport.update({
@@ -44,14 +38,12 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cookbook': typeof CookbookRoute
-  '/examples': typeof ExamplesRoute
   '/groceries': typeof GroceriesRoute
   '/workouts': typeof WorkoutsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cookbook': typeof CookbookRoute
-  '/examples': typeof ExamplesRoute
   '/groceries': typeof GroceriesRoute
   '/workouts': typeof WorkoutsRoute
 }
@@ -59,22 +51,20 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/cookbook': typeof CookbookRoute
-  '/examples': typeof ExamplesRoute
   '/groceries': typeof GroceriesRoute
   '/workouts': typeof WorkoutsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/cookbook' | '/examples' | '/groceries' | '/workouts'
+  fullPaths: '/' | '/cookbook' | '/groceries' | '/workouts'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cookbook' | '/examples' | '/groceries' | '/workouts'
-  id: '__root__' | '/' | '/cookbook' | '/examples' | '/groceries' | '/workouts'
+  to: '/' | '/cookbook' | '/groceries' | '/workouts'
+  id: '__root__' | '/' | '/cookbook' | '/groceries' | '/workouts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CookbookRoute: typeof CookbookRoute
-  ExamplesRoute: typeof ExamplesRoute
   GroceriesRoute: typeof GroceriesRoute
   WorkoutsRoute: typeof WorkoutsRoute
 }
@@ -93,13 +83,6 @@ declare module '@tanstack/react-router' {
       path: '/groceries'
       fullPath: '/groceries'
       preLoaderRoute: typeof GroceriesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/examples': {
-      id: '/examples'
-      path: '/examples'
-      fullPath: '/examples'
-      preLoaderRoute: typeof ExamplesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookbook': {
@@ -122,7 +105,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CookbookRoute: CookbookRoute,
-  ExamplesRoute: ExamplesRoute,
   GroceriesRoute: GroceriesRoute,
   WorkoutsRoute: WorkoutsRoute,
 }

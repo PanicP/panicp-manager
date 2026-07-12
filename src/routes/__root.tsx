@@ -5,7 +5,6 @@ const links = [
   { to: '/cookbook', label: 'Cookbook' },
   { to: '/workouts', label: 'Workouts' },
   { to: '/groceries', label: 'Groceries' },
-  { to: '/examples', label: 'Examples' },
 ] as const
 
 const RootLayout = () => {
