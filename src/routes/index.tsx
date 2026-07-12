@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Spinner } from '@/components/ui/spinner'
 
 type Recipe = { id: number; name: string }
 type Workout = { id: number; name: string; exercises: unknown[] }
@@ -38,9 +39,9 @@ const useIngredients = () =>
   })
 
 const DashboardPage = () => {
-  const { data: recipes } = useRecipes()
-  const { data: workouts } = useWorkouts()
-  const { data: ingredients } = useIngredients()
+  const { data: recipes, isPending: recipesPending } = useRecipes()
+  const { data: workouts, isPending: workoutsPending } = useWorkouts()
+  const { data: ingredients, isPending: ingredientsPending } = useIngredients()
 
   const exerciseCount = workouts?.reduce((sum, w) => sum + w.exercises.length, 0) ?? 0
   const selectedCount = ingredients?.filter((i) => i.selected).length ?? 0
@@ -56,10 +57,16 @@ const DashboardPage = () => {
               <CardTitle>Cookbook</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-1 text-left">
-              <p>{recipes?.length ?? 0} recipes</p>
-              <p className="truncate text-sm text-muted-foreground">
-                {recipes?.map((r) => r.name).join(', ') || 'No recipes yet'}
-              </p>
+              {recipesPending ? (
+                <Spinner />
+              ) : (
+                <>
+                  <p>{recipes?.length ?? 0} recipes</p>
+                  <p className="truncate text-sm text-muted-foreground">
+                    {recipes?.map((r) => r.name).join(', ') || 'No recipes yet'}
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </Link>
@@ -70,8 +77,14 @@ const DashboardPage = () => {
               <CardTitle>Workouts</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-1 text-left">
-              <p>{workouts?.length ?? 0} workouts</p>
-              <p className="text-sm text-muted-foreground">{exerciseCount} exercises total</p>
+              {workoutsPending ? (
+                <Spinner />
+              ) : (
+                <>
+                  <p>{workouts?.length ?? 0} workouts</p>
+                  <p className="text-sm text-muted-foreground">{exerciseCount} exercises total</p>
+                </>
+              )}
             </CardContent>
           </Card>
         </Link>
@@ -82,8 +95,14 @@ const DashboardPage = () => {
               <CardTitle>Groceries</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-1 text-left">
-              <p>{selectedCount} picked this week</p>
-              <p className="text-sm text-muted-foreground">{ingredients?.length ?? 0} ingredients in pool</p>
+              {ingredientsPending ? (
+                <Spinner />
+              ) : (
+                <>
+                  <p>{selectedCount} picked this week</p>
+                  <p className="text-sm text-muted-foreground">{ingredients?.length ?? 0} ingredients in pool</p>
+                </>
+              )}
             </CardContent>
           </Card>
         </Link>

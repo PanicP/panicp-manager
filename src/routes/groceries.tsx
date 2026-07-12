@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { supabase } from '@/supabaseClient'
@@ -7,30 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-
-type Ingredient = { id: number; name: string; selected: boolean }
-
-const useIngredients = () => {
-  return useQuery({
-    queryKey: ['ingredients'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('ingredients').select('*').order('name')
-      if (error) throw error
-      return data as Ingredient[]
-    },
-  })
-}
-
-const useAddIngredient = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async (name: string) => {
-      const { error } = await supabase.from('ingredients').insert({ name, selected: false })
-      if (error) throw error
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ingredients'] }),
-  })
-}
+import { Spinner } from '@/components/ui/spinner'
+import { useIngredientPool, useAddToIngredientPool } from '@/services/ingredients'
 
 const useToggleIngredient = () => {
   const queryClient = useQueryClient()
@@ -55,15 +33,15 @@ const useDeleteIngredient = () => {
 }
 
 const GroceriesPage = () => {
-  const { data: ingredients, isPending, error } = useIngredients()
-  const addIngredient = useAddIngredient()
+  const { data: ingredients, isPending, error } = useIngredientPool()
+  const addIngredient = useAddToIngredientPool()
   const toggleIngredient = useToggleIngredient()
   const deleteIngredient = useDeleteIngredient()
   const [newName, setNewName] = useState('')
 
   const handleAdd = () => {
     if (!newName.trim()) return
-    addIngredient.mutate(newName.trim(), { onSuccess: () => setNewName('') })
+    addIngredient.mutate([newName.trim()], { onSuccess: () => setNewName('') })
   }
 
   const selected = ingredients?.filter((i) => i.selected) ?? []
@@ -73,7 +51,11 @@ const GroceriesPage = () => {
     <div className="flex flex-col gap-4 p-4">
       <h1>Groceries</h1>
 
-      {isPending && <p>Loading...</p>}
+      {isPending && (
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Spinner /> Loading ingredients...
+        </div>
+      )}
       {error && <p>Error: {error.message}</p>}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -85,12 +67,16 @@ const GroceriesPage = () => {
             {selected.length === 0 && <p className="text-sm text-muted-foreground">Nothing picked yet.</p>}
             {selected.map((ingredient) => (
               <label key={ingredient.id} className="flex items-center gap-2">
-                <Checkbox
-                  checked={ingredient.selected}
-                  onCheckedChange={(checked) =>
-                    toggleIngredient.mutate({ id: ingredient.id, selected: checked === true })
-                  }
-                />
+                {toggleIngredient.isPending && toggleIngredient.variables?.id === ingredient.id ? (
+                  <Spinner />
+                ) : (
+                  <Checkbox
+                    checked={ingredient.selected}
+                    onCheckedChange={(checked) =>
+                      toggleIngredient.mutate({ id: ingredient.id, selected: checked === true })
+                    }
+                  />
+                )}
                 {ingredient.name}
               </label>
             ))}
@@ -109,23 +95,36 @@ const GroceriesPage = () => {
                 onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
                 placeholder="Add ingredient"
               />
-              <Button onClick={handleAdd}>
-                <Plus />
+              <Button onClick={handleAdd} disabled={addIngredient.isPending}>
+                {addIngredient.isPending ? <Spinner /> : <Plus />}
               </Button>
             </div>
             {pool.map((ingredient) => (
               <div key={ingredient.id} className="flex items-center gap-2">
                 <label className="flex flex-1 items-center gap-2">
-                  <Checkbox
-                    checked={ingredient.selected}
-                    onCheckedChange={(checked) =>
-                      toggleIngredient.mutate({ id: ingredient.id, selected: checked === true })
-                    }
-                  />
+                  {toggleIngredient.isPending && toggleIngredient.variables?.id === ingredient.id ? (
+                    <Spinner />
+                  ) : (
+                    <Checkbox
+                      checked={ingredient.selected}
+                      onCheckedChange={(checked) =>
+                        toggleIngredient.mutate({ id: ingredient.id, selected: checked === true })
+                      }
+                    />
+                  )}
                   {ingredient.name}
                 </label>
-                <Button variant="ghost" size="icon-sm" onClick={() => deleteIngredient.mutate(ingredient.id)}>
-                  <Trash2 />
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => deleteIngredient.mutate(ingredient.id)}
+                  disabled={deleteIngredient.isPending && deleteIngredient.variables === ingredient.id}
+                >
+                  {deleteIngredient.isPending && deleteIngredient.variables === ingredient.id ? (
+                    <Spinner />
+                  ) : (
+                    <Trash2 />
+                  )}
                 </Button>
               </div>
             ))}
