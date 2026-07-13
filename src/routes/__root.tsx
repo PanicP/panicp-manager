@@ -10,7 +10,7 @@ const links = [
 const RootLayout = () => {
   return (
     <>
-      <nav className="flex gap-1 overflow-x-auto border-b border-border px-4 py-2">
+      <nav className="flex gap-1 overflow-x-auto border-b border-border px-4 py-2 [@media(display-mode:standalone)]:fixed [@media(display-mode:standalone)]:inset-x-0 [@media(display-mode:standalone)]:bottom-0 [@media(display-mode:standalone)]:border-t [@media(display-mode:standalone)]:border-b-0 [@media(display-mode:standalone)]:bg-background">
         {links.map((link) => (
           <Link
             key={link.to}
@@ -23,7 +23,9 @@ const RootLayout = () => {
           </Link>
         ))}
       </nav>
-      <Outlet />
+      <div className="[@media(display-mode:standalone)]:pb-14">
+        <Outlet />
+      </div>
     </>
   )
 }
